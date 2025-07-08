@@ -15,5 +15,5 @@ public class PostListResponse {
 
     private List<PostSummaryDto> posts;
     private Long nextCursorId;
-    private boolean hasNextPage;
+    private boolean hasNext;
 }

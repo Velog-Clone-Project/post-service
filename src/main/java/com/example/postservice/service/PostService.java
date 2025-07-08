@@ -1,6 +1,5 @@
 package com.example.postservice.service;
 
-import com.example.common.dto.ApiResponse;
 import com.example.postservice.domain.PostEntity;
 import com.example.postservice.domain.PostLikeEntity;
 import com.example.postservice.dto.*;
@@ -50,7 +49,7 @@ public class PostService {
         return PostListResponse.builder()
                 .posts(dtoList)
                 .nextCursorId(nextCursorId)
-                .hasNextPage(hasNext)
+                .hasNext(hasNext)
                 .build();
     }
 
