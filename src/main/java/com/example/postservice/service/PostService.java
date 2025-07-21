@@ -159,6 +159,8 @@ public class PostService {
 
         postRepository.delete(post);
 
+        // TODO: 게시글 삭제시 댓글 서비스에 게시글에 연결된 댓글 삭제 요청(RabbitMQ 처리)
+
         return Map.of("postId", postId);
     }
 
