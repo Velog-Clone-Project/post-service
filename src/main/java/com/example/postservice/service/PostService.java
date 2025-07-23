@@ -54,7 +54,7 @@ public class PostService {
     }
 
     @Transactional
-    public CreatePostResponse createPost(CreatePostRequest request, String authorId) {
+    public CreatePostResponse createPost(CreatePostRequest request, String userId) {
         // 썸네일 URL 추출 (간단한 정규표현식)
         String thumbnailUrl = extractFirstImageUrl(request.getContent());
 
@@ -62,7 +62,7 @@ public class PostService {
                 .title(request.getTitle())
                 .content(request.getContent())
                 .thumbnailUrl(thumbnailUrl)
-                .authorId(authorId)
+                .userId(userId)
                 .authorName("지현") // TODO: user-service → 메시지 큐로부터 사용자 정보 수신 예정
                 .authorProfileImageUrl("default-image-url") // TODO: user-service → 메시지 큐로부터 사용자 정보 수신 예정
                 .createdAt(LocalDateTime.now())
@@ -111,7 +111,7 @@ public class PostService {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
 
-        if (!post.getAuthorId().equals(authorId)) {
+        if (!post.getUserId().equals(authorId)) {
             throw new PostAccessDeniedException();
         }
 
@@ -151,7 +151,7 @@ public class PostService {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
 
-        if (!post.getAuthorId().equals(authorId)) {
+        if (!post.getUserId().equals(authorId)) {
             throw new PostAccessDeniedException();
         }
 
@@ -204,7 +204,7 @@ public class PostService {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
 
-        if (!post.getAuthorId().equals(userId)) {
+        if (!post.getUserId().equals(userId)) {
             throw new PostAccessDeniedException();
         }
 

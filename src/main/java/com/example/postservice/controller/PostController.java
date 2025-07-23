@@ -38,9 +38,9 @@ public class PostController {
     @PostMapping
     public ResponseEntity<ApiResponse<CreatePostResponse>> createPost(
             @RequestBody CreatePostRequest request,
-            @RequestHeader("X-User-Id") String authorId) {
+            @RequestHeader("X-User-Id") String userId) {
 
-        CreatePostResponse response = postService.createPost(request, authorId);
+        CreatePostResponse response = postService.createPost(request, userId);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -60,9 +60,9 @@ public class PostController {
     public ResponseEntity<ApiResponse<UpdatePostResponse>> updatePost(
             @PathVariable Long postId,
             @RequestBody UpdatePostRequest request,
-            @RequestHeader("X-User-Id") String authorId) {
+            @RequestHeader("X-User-Id") String userId) {
 
-        UpdatePostResponse response = postService.updatePost(postId, request, authorId);
+        UpdatePostResponse response = postService.updatePost(postId, request, userId);
 
         return ResponseEntity
                 .ok(new ApiResponse<>("Post updated successfully", response));
@@ -71,9 +71,9 @@ public class PostController {
     @DeleteMapping("/{postId}")
     public ResponseEntity<ApiResponse<Map>> deletePost(
             @PathVariable Long postId,
-            @RequestHeader("X-User-Id") String authorId) {
+            @RequestHeader("X-User-Id") String userId) {
 
-        Map<String, Object> response = postService.deletePost(postId, authorId);
+        Map<String, Object> response = postService.deletePost(postId, userId);
 
         return ResponseEntity
                 .ok(new ApiResponse<>("Post deleted successfully", response));

@@ -29,7 +29,7 @@ public class PostEntity {
 
     // 작성자 정보 스냅샷
     @Column(nullable = false)
-    private String authorId;
+    private String userId;
 
     /*
      * authorName과 authorProfileImageUrl은 user-service에서 관리되고,
