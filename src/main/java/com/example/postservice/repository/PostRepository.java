@@ -29,4 +29,17 @@ public interface PostRepository extends JpaRepository<PostEntity , Long> {
     @Modifying
     @Query("UPDATE PostEntity p SET p.likeCount = p.likeCount - 1 WHERE p.id = :postId AND p.likeCount > 0")
     void decrementLikeCount(@Param("postId") Long postId);
+
+    @Query("""
+    SELECT p FROM PostEntity p 
+    WHERE p.userId = :userId 
+      AND (:cursorId IS NULL OR p.id < :cursorId) 
+    ORDER BY p.id DESC
+""")
+    List<PostEntity> findNextPageByUserId(
+            @Param("userId") String userId,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
 }
