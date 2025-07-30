@@ -32,10 +32,4 @@ public class PostLikeEntity {
 
     @Column(nullable = false)
     private LocalDateTime likedAt;
-
-//    public PostLikeEntity(PostEntity post, String userId) {
-//        this.post = post;
-//        this.userId = userId;
-//        this.likedAt = LocalDateTime.now();
-//    }
 }

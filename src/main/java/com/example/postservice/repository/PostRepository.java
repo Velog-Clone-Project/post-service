@@ -11,7 +11,7 @@ import java.util.List;
 
 public interface PostRepository extends JpaRepository<PostEntity , Long> {
 
-    @Query("SELECT p FROM PostEntity p WHERE (:cursorId IS NULL OR p.id < :cursorId) ORDER BY p.id DESC")
+    @Query("SELECT p FROM PostEntity p WHERE (:cursorId IS NULL OR p.id < :cursorId) ORDER BY p.createdAt DESC")
     List<PostEntity> findNextPage(@Param("cursorId") Long cursorId, Pageable pageable);
 
     // 일반적으로 좋아요 수를 증가시킬때 객체를 get->update 하는 방식으로 하면
@@ -34,7 +34,7 @@ public interface PostRepository extends JpaRepository<PostEntity , Long> {
     SELECT p FROM PostEntity p 
     WHERE p.userId = :userId 
       AND (:cursorId IS NULL OR p.id < :cursorId) 
-    ORDER BY p.id DESC
+    ORDER BY p.createdAt DESC
 """)
     List<PostEntity> findNextPageByUserId(
             @Param("userId") String userId,
@@ -42,4 +42,32 @@ public interface PostRepository extends JpaRepository<PostEntity , Long> {
             Pageable pageable
     );
 
+    // 사용자 ID로 작성자 정보를 업데이트하는 메서드
+    // @Modifying, @Query는 update문에 필수적
+    // clearAutomatically = true는 트랜잭션이 끝난 후 영속성 컨텍스트를 초기화하여
+    // 변경된 엔티티가 영속성 컨텍스트에 남아있지 않도록 한다.
+    @Modifying(clearAutomatically = true)
+    @Query("UPDATE PostEntity p SET p.authorName = :authorName, p.authorProfileImageUrl = :authorProfileImageUrl " +
+            "WHERE p.userId = :userId")
+    void updateAuthorInfoByUserId(
+            @Param("userId") String userId,
+            @Param("authorName") String authorName,
+            @Param("authorProfileImageUrl") String authorProfileImageUrl
+    );
+
+    @Query("""
+        SELECT p FROM PostEntity p
+        WHERE p.id IN (
+            SELECT pl.postId FROM PostLikeEntity pl WHERE pl.userId = :userId
+        )
+        AND (:cursorId IS NULL OR p.id < :cursorId)
+        ORDER BY p.createdAt DESC
+    """)
+    List<PostEntity> findLikedPostsByUserId(
+            @Param("userId") String userId,
+            @Param("cursorId") Long cursorId,
+            Pageable pageable
+    );
+
+    void deleteByUserId(String userId);
 }
