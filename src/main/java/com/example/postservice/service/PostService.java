@@ -1,11 +1,14 @@
 package com.example.postservice.service;
 
+import com.example.postservice.client.CommentServiceClient;
+import com.example.postservice.client.UserServiceClient;
 import com.example.postservice.domain.PostEntity;
 import com.example.postservice.domain.PostLikeEntity;
 import com.example.postservice.dto.*;
 import com.example.postservice.exception.*;
 import com.example.postservice.repository.PostLikeRepository;
 import com.example.postservice.repository.PostRepository;
+import feign.FeignException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +29,9 @@ public class PostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
     private final MinioService minioService;
+
+    private final UserServiceClient userServiceClient;
+    private final CommentServiceClient commentServiceClient;
 
     public PostListResponse getPosts(Long cursorId) {
 
@@ -58,13 +64,20 @@ public class PostService {
         // 썸네일 URL 추출 (간단한 정규표현식)
         String thumbnailUrl = extractFirstImageUrl(request.getContent());
 
+        InternalUserProfileResponse profile;
+        try {
+            profile = userServiceClient.getUserProfile(userId);
+        } catch (FeignException.NotFound e) {
+            throw new UserNotFoundException();
+        }
+
         PostEntity post = PostEntity.builder()
                 .title(request.getTitle())
                 .content(request.getContent())
                 .thumbnailUrl(thumbnailUrl)
                 .userId(userId)
-                .authorName("지현") // TODO: user-service → 메시지 큐로부터 사용자 정보 수신 예정
-                .authorProfileImageUrl("default-image-url") // TODO: user-service → 메시지 큐로부터 사용자 정보 수신 예정
+                .authorName(profile.getProfileName())
+                .authorProfileImageUrl(profile.getProfileImageUrl())
                 .createdAt(LocalDateTime.now())
                 .likeCount(0)
                 .commentCount(0)
@@ -86,7 +99,15 @@ public class PostService {
         PostEntity post = postRepository.findById(postId)
                 .orElseThrow(PostNotFoundException::new);
 
-        // TODO: comment-service에 postId를 이용하여 댓글 목록 조회 (RabbitMQ 처리)
+        List<CommentDto> comments;
+        try{
+           comments = commentServiceClient.getCommentsByPostId(postId);
+        }catch (FeignException.NotFound e) {
+            throw new CommentNotFoundException();
+        } catch (FeignException e) {
+            throw new ExternalServiceException(e);
+        }
+
 
         return PostDetailResponse.builder()
                 .postId(post.getId())
@@ -97,7 +118,7 @@ public class PostService {
                 .createdAt(post.getCreatedAt())
                 .commentCount(post.getCommentCount())
                 .likeCount(post.getLikeCount())
-                .comments(List.of()) // TODO: 댓글 목록 조회 후 설정
+                .comments(comments)
                 .build();
     }
 
@@ -171,7 +192,7 @@ public class PostService {
             throw new InvalidPostIdFormatException();
         }
 
-        if(postRepository.existsById(postId)) {
+        if (postRepository.existsById(postId)) {
             throw new PostNotFoundException();
         }
 
