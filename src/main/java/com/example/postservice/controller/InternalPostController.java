@@ -51,7 +51,7 @@ public class InternalPostController {
         return ResponseEntity.ok().build();
     }
 
-    @GetMapping("/internal/posts/exists/{postId}")
+    @GetMapping("/exists/{postId}")
     public ResponseEntity<Void> checkPostExists(@PathVariable Long postId) {
         if (internalPostService.postExists(postId)) {
             return ResponseEntity.ok().build(); // 200 OK
