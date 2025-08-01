@@ -10,6 +10,6 @@ public class ExternalServiceException extends BaseCustomException {
 
     @Override
     public int getStatusCode() {
-        return 0;
+        return 500;
     }
 }
