@@ -5,6 +5,7 @@ import com.example.postservice.client.UserServiceClient;
 import com.example.postservice.domain.PostEntity;
 import com.example.postservice.domain.PostLikeEntity;
 import com.example.postservice.dto.*;
+import com.example.postservice.event.PostEventPublisher;
 import com.example.postservice.exception.*;
 import com.example.postservice.repository.PostLikeRepository;
 import com.example.postservice.repository.PostRepository;
@@ -32,6 +33,8 @@ public class PostService {
 
     private final UserServiceClient userServiceClient;
     private final CommentServiceClient commentServiceClient;
+
+    private final PostEventPublisher postEventPublisher;
 
     public PostListResponse getPosts(Long cursorId) {
 
@@ -100,9 +103,9 @@ public class PostService {
                 .orElseThrow(PostNotFoundException::new);
 
         List<CommentDto> comments;
-        try{
-           comments = commentServiceClient.getCommentsByPostId(postId);
-        }catch (FeignException.NotFound e) {
+        try {
+            comments = commentServiceClient.getCommentsByPostId(postId);
+        } catch (FeignException.NotFound e) {
             throw new CommentNotFoundException();
         } catch (FeignException e) {
             throw new ExternalServiceException(e);
@@ -180,7 +183,7 @@ public class PostService {
 
         postRepository.delete(post);
 
-        // TODO: 게시글 삭제시 댓글 서비스에 게시글에 연결된 댓글 삭제 요청(RabbitMQ 처리)
+        postEventPublisher.sendPostDeletedEvent(postId);
 
         return Map.of("postId", postId);
     }
