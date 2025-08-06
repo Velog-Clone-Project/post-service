@@ -3,7 +3,7 @@ package com.example.postservice.service;
 import com.example.postservice.domain.PostEntity;
 import com.example.postservice.dto.PostListResponse;
 import com.example.postservice.dto.PostSummaryDto;
-import com.example.postservice.dto.UpdateAuthorInfoRequest;
+import com.example.postservice.event.UpdateAuthorInfoEvent;
 import com.example.postservice.repository.PostLikeRepository;
 import com.example.postservice.repository.PostRepository;
 import lombok.RequiredArgsConstructor;
@@ -45,7 +45,7 @@ public class InternalPostService {
     }
 
     @Transactional
-    public void updateAuthorInfo(UpdateAuthorInfoRequest request) {
+    public void updateAuthorInfo(UpdateAuthorInfoEvent request) {
 
         postRepository.updateAuthorInfoByUserId(
                 request.getUserId(),

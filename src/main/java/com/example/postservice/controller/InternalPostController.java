@@ -1,7 +1,7 @@
 package com.example.postservice.controller;
 
 import com.example.postservice.dto.PostListResponse;
-import com.example.postservice.dto.UpdateAuthorInfoRequest;
+import com.example.postservice.event.UpdateAuthorInfoEvent;
 import com.example.postservice.exception.InvalidCursorIdException;
 import com.example.postservice.service.InternalPostService;
 import lombok.RequiredArgsConstructor;
@@ -30,7 +30,7 @@ public class InternalPostController {
     }
 
     @PutMapping("/author-info")
-    public ResponseEntity<Void> updateAuthorInfo(@RequestBody UpdateAuthorInfoRequest request) {
+    public ResponseEntity<Void> updateAuthorInfo(@RequestBody UpdateAuthorInfoEvent request) {
         internalPostService.updateAuthorInfo(request);
 
         return ResponseEntity.ok().build();
