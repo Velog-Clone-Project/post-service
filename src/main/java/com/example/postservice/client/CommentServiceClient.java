@@ -9,9 +9,11 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import java.util.List;
 
-@FeignClient(name = "comment-service", url = "http://comment-service:8004")
+@FeignClient(name = "comment-service",
+//        url = "http://comment-service:8004",
+        path = "/internal")
 public interface CommentServiceClient {
 
-    @GetMapping("/internal/comments")
+    @GetMapping("/comments")
     List<CommentDto> getCommentsByPostId(@RequestParam Long postId);
 }
