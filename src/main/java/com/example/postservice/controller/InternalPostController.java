@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
-@RequestMapping("/internal/posts/")
+@RequestMapping("/internal/posts")
 public class InternalPostController {
 
     private final InternalPostService internalPostService;
