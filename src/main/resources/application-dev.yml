@@ -20,6 +20,6 @@ spring:
 
 minio:
   url: http://localhost:9000
-  access-key: ROOTUSER
-  secret-key: CHANGEME123
+  access-key: root
+  secret-key: password
   bucket: images
