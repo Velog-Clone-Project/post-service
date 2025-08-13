@@ -41,8 +41,11 @@ public class PostEntity {
     private String authorProfileImageUrl;
 
     // 카운트 필드 (denormalization)
+    @Builder.Default
     @Column(nullable = false)
     private int likeCount = 0;
+    
+    @Builder.Default
     @Column(nullable = false)
     private int commentCount = 0;
 
