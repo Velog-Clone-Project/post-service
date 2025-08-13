@@ -36,27 +36,34 @@ public class PostService {
 
     private final PostEventPublisher postEventPublisher;
 
-    public PostListResponse getPosts(Long cursorId) {
+    private static final int PAGE_SIZE = 20;
 
-        List<PostEntity> posts = postRepository.findNextPage(cursorId, Pageable.ofSize(20));
+    public PostSummaryListDto getPosts(Long cursorId) {
 
-        List<PostSummaryDto> dtoList = posts.stream().map(post -> PostSummaryDto.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .thumbnailUrl(post.getThumbnailUrl())
-                .authorName(post.getAuthorName())
-                .authorProfileImageUrl(post.getAuthorProfileImageUrl())
-                .createdAt(post.getCreatedAt())
-                .commentCount(post.getCommentCount())
-                .likeCount(post.getLikeCount())
-                .build()
-        ).toList();
+        List<PostEntity> entities = postRepository.findNextPage(cursorId, Pageable.ofSize(PAGE_SIZE + 1));
 
-        Long nextCursorId = !posts.isEmpty() ? posts.get(posts.size() - 1).getId() : null;
-        boolean hasNext = nextCursorId != null && postRepository.existsById(nextCursorId);
+        boolean hasNext = entities.size() > PAGE_SIZE;
+        if (hasNext) {
+            entities = entities.subList(0, PAGE_SIZE); // 초과 데이터 제거
+        }
 
-        return PostListResponse.builder()
-                .posts(dtoList)
+        List<PostSummaryDto> dtoList = entities.stream()
+                .map(post -> PostSummaryDto.builder()
+                        .postId(post.getId())
+                        .title(post.getTitle())
+                        .thumbnailUrl(post.getThumbnailUrl())
+                        .authorName(post.getAuthorName())
+                        .authorProfileImageUrl(post.getAuthorProfileImageUrl())
+                        .createdAt(post.getCreatedAt())
+                        .commentCount(post.getCommentCount())
+                        .likeCount(post.getLikeCount())
+                        .build()
+                ).toList();
+
+        Long nextCursorId = hasNext ? entities.get(entities.size() - 1).getId() : null;
+
+        return PostSummaryListDto.builder()
+                .items(dtoList)
                 .nextCursorId(nextCursorId)
                 .hasNext(hasNext)
                 .build();
@@ -195,7 +202,7 @@ public class PostService {
             throw new InvalidPostIdFormatException();
         }
 
-        if (postRepository.existsById(postId)) {
+        if (!postRepository.existsById(postId)) {
             throw new PostNotFoundException();
         }
 

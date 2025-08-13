@@ -1,6 +1,6 @@
 package com.example.postservice.controller;
 
-import com.example.postservice.dto.PostListResponse;
+import com.example.postservice.dto.PostSummaryListDto;
 import com.example.postservice.event.UpdateAuthorInfoEvent;
 import com.example.postservice.exception.InvalidCursorIdException;
 import com.example.postservice.service.InternalPostService;
@@ -16,7 +16,7 @@ public class InternalPostController {
     private final InternalPostService internalPostService;
 
     @GetMapping
-    public ResponseEntity<PostListResponse> getPostsByUserId(
+    public ResponseEntity<PostSummaryListDto> getPostsByUserId(
             @RequestParam String userId,
             @RequestParam(required = false) Long cursorId) {
 
@@ -24,7 +24,7 @@ public class InternalPostController {
             throw new InvalidCursorIdException();
         }
 
-        PostListResponse response = internalPostService.getPostsByUserId(userId, cursorId);
+        PostSummaryListDto response = internalPostService.getPostsByUserId(userId, cursorId);
 
         return ResponseEntity.ok(response);
     }
@@ -37,11 +37,11 @@ public class InternalPostController {
     }
 
     @GetMapping("/liked")
-    public ResponseEntity<PostListResponse> getLikedPosts(
+    public ResponseEntity<PostSummaryListDto> getLikedPosts(
             @RequestParam String userId,
             @RequestParam(required = false) Long cursorId) {
 
-        PostListResponse response = internalPostService.getLikedPostsByUserId(userId, cursorId);
+        PostSummaryListDto response = internalPostService.getLikedPostsByUserId(userId, cursorId);
         return ResponseEntity.ok(response);
     }
 

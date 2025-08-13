@@ -1,5 +1,6 @@
 package com.example.postservice.dto;
 
+import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -11,9 +12,10 @@ import java.util.List;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PostListResponse {
+public class PostSummaryListDto {
 
-    private List<PostSummaryDto> posts;
+    private List<PostSummaryDto> items;
+    @JsonInclude(JsonInclude.Include.NON_NULL)
     private Long nextCursorId;
     private boolean hasNext;
 }

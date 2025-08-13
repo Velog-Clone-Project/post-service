@@ -1,7 +1,7 @@
 package com.example.postservice.service;
 
 import com.example.postservice.domain.PostEntity;
-import com.example.postservice.dto.PostListResponse;
+import com.example.postservice.dto.PostSummaryListDto;
 import com.example.postservice.dto.PostSummaryDto;
 import com.example.postservice.event.UpdateAuthorInfoEvent;
 import com.example.postservice.repository.PostLikeRepository;
@@ -20,25 +20,33 @@ public class InternalPostService {
     private final PostRepository postRepository;
     private final PostLikeRepository postLikeRepository;
 
-    public PostListResponse getPostsByUserId(String userId, Long cursorId) {
+    private static final int PAGE_SIZE = 20;
 
-        List<PostEntity> posts = postRepository.findNextPageByUserId(userId,cursorId, Pageable.ofSize(20));
 
-        List<PostSummaryDto> dtoList = posts.stream().map(post -> PostSummaryDto.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .thumbnailUrl(post.getThumbnailUrl())
-                .createdAt(post.getCreatedAt())
-                .commentCount(post.getCommentCount())
-                .likeCount(post.getLikeCount())
-                .build()
-        ).toList();
+    public PostSummaryListDto getPostsByUserId(String userId, Long cursorId) {
 
-        Long nextCursorId = !posts.isEmpty() ? posts.get(posts.size() - 1).getId() : null;
-        boolean hasNext = nextCursorId != null && postRepository.existsById(nextCursorId);
+        List<PostEntity> entities = postRepository.findNextPageByUserId(userId, cursorId, Pageable.ofSize(PAGE_SIZE + 1));
 
-        return PostListResponse.builder()
-                .posts(dtoList)
+        boolean hasNext = entities.size() > PAGE_SIZE;
+        if (hasNext) {
+            entities = entities.subList(0, PAGE_SIZE);
+        }
+
+        List<PostSummaryDto> dtoList = entities.stream()
+                .map(post -> PostSummaryDto.builder()
+                        .postId(post.getId())
+                        .title(post.getTitle())
+                        .thumbnailUrl(post.getThumbnailUrl())
+                        .createdAt(post.getCreatedAt())
+                        .commentCount(post.getCommentCount())
+                        .likeCount(post.getLikeCount())
+                        .build()
+                ).toList();
+
+        Long nextCursorId = hasNext ? entities.get(entities.size() - 1).getId() : null;
+
+        return PostSummaryListDto.builder()
+                .items(dtoList)
                 .nextCursorId(nextCursorId)
                 .hasNext(hasNext)
                 .build();
@@ -54,25 +62,30 @@ public class InternalPostService {
         );
     }
 
-    public PostListResponse getLikedPostsByUserId(String userId, Long cursorId) {
+    public PostSummaryListDto getLikedPostsByUserId(String userId, Long cursorId) {
 
-        List<PostEntity> posts = postRepository.findLikedPostsByUserId(userId,cursorId, Pageable.ofSize(20));
+        List<PostEntity> entities = postRepository.findLikedPostsByUserId(userId, cursorId, Pageable.ofSize(PAGE_SIZE + 1));
 
-        List<PostSummaryDto> dtoList = posts.stream().map(post -> PostSummaryDto.builder()
-                .postId(post.getId())
-                .title(post.getTitle())
-                .thumbnailUrl(post.getThumbnailUrl())
-                .createdAt(post.getCreatedAt())
-                .commentCount(post.getCommentCount())
-                .likeCount(post.getLikeCount())
-                .build()
-        ).toList();
+        boolean hasNext = entities.size() > PAGE_SIZE;
+        if (hasNext) {
+            entities = entities.subList(0, PAGE_SIZE);
+        }
 
-        Long nextCursorId = !posts.isEmpty() ? posts.get(posts.size() - 1).getId() : null;
-        boolean hasNext = nextCursorId != null && postRepository.existsById(nextCursorId);
+        List<PostSummaryDto> dtoList = entities.stream()
+                .map(post -> PostSummaryDto.builder()
+                        .postId(post.getId())
+                        .title(post.getTitle())
+                        .thumbnailUrl(post.getThumbnailUrl())
+                        .createdAt(post.getCreatedAt())
+                        .commentCount(post.getCommentCount())
+                        .likeCount(post.getLikeCount())
+                        .build()
+                ).toList();
 
-        return PostListResponse.builder()
-                .posts(dtoList)
+        Long nextCursorId = hasNext ? entities.get(entities.size() - 1).getId() : null;
+
+        return PostSummaryListDto.builder()
+                .items(dtoList)
                 .nextCursorId(nextCursorId)
                 .hasNext(hasNext)
                 .build();

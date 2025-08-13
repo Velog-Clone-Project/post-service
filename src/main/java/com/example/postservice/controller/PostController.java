@@ -20,7 +20,7 @@ public class PostController {
     private final PostService postService;
 
     @GetMapping
-    public ResponseEntity<ApiResponse<PostListResponse>> getPosts(@RequestParam(required = false) Long cursorId) {
+    public ResponseEntity<ApiResponse<PostSummaryListResponse>> getPosts(@RequestParam(required = false) Long cursorId) {
 
         // cursorId는 optional로 받게되는데, 이 상태에서 cursorId가 <= 0만 검사하면
         // cursorId = null인 경우 NullPointerException이 발생하기 때문에
@@ -29,7 +29,11 @@ public class PostController {
             throw new InvalidCursorIdException();
         }
 
-        PostListResponse response = postService.getPosts(cursorId);
+        PostSummaryListDto posts = postService.getPosts(cursorId);
+
+        PostSummaryListResponse response = PostSummaryListResponse.builder()
+                .posts(posts)
+                .build();
 
         return ResponseEntity
                 .ok(new ApiResponse<>("Posts retrieved successfully", response));
